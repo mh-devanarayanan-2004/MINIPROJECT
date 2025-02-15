@@ -4,21 +4,99 @@
 </head>
 <body bgcolor="#F0FFFF">
 
-<table bgcolor="#097969" width="100%" height="70">
-<tbody><tr><td align="center">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: #333;
+}
+
+.topnav a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.topnav .icon {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .topnav a:not(:first-child) {display: none;}
+  .topnav a.icon {
+    float: right;
+    display: block;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .topnav.responsive {position: relative;}
+  .topnav.responsive .icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .topnav.responsive a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+}
+</style>
+
+
+<div class="topnav" id="myTopnav">
 <table align="center" width="60%" height="40">
-       <tbody><tr><td align="center" width="120"><font color="white"><h3><a href="miniproject.html">HOME </a> </h3></font></td> 
-        <td align="center" width="120"><font color="white"><h3> DETAILS </h3></font></td> 
-         <td align="center" width="120"><font color="white"><h3><a href="miniproject.html#con"> CONTACT </a></h3></font></td> 
-           <td align="center" width="120"><font color="white"><h3> MORE </h3></font></td> 
-</tr></tbody></table>
-</td>
-</tr></tbody></table>
+       <tbody><tr>
+        <td align="center" width="120"><a href="#home" class="active">Home</a></td> 
+        <td align="center" width="120"><a href="#Time">TIME</a></td> 
+        <td align="center" width="120"><a href="#contact">Contact</a></td> 
+        <td align="center" width="120"><a href="#about">About</a></td> 
+       </tr></tbody></table>
+
+  <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+    <i class="fa fa-bars"></i>
+  </a>
+</div>
+
+
+<script>
+function myFunction() {
+  var x = document.getElementById("myTopnav");
+  if (x.className === "topnav") {
+    x.className += " responsive";
+  } else {
+    x.className = "topnav";
+  }
+}
+</script>
+
 
 <table bgcolor="#F0FFFF" width="100%" height="30">
 <tbody><tr><td align="center">
 </td>
-</tr></tbody></table>
+</tr></tbody>
+</table>
 
 
 <img src="iotimg.png" height="40%" width="100%">
@@ -28,10 +106,11 @@
 </td>
 </tr></tbody></table>
 
-<table align="left" bgcolor="#767D66" width="30%" height="25%"><tbody><tr>
+<table align="left" bgcolor="#04AA6D" width="30%" height="25%"><tbody><tr>
 <td align="center"><font color="#D3D3D3">
 <table align="left" width="100%" height="50%">
 <h1><i>
+<a id="Time">
 <script type="text/javascript">
 
 
@@ -54,22 +133,18 @@ document.write("</br></br>");
         minutes = minutes < 10 ? '0' + minutes : minutes;
         let myTime = hours + " : " + minutes + "  " + ampm  ;
         document.write("\tTIME : " + myTime); 
-    </script></i
+    </script></a>
+</i
 ></h1>
 
 </table></td></font>
 </tr></tbody></table>
 
 
-<table bgcolor="#173B16	" width="70%" height="25%">
+<table bgcolor="#333" width="70%" height="25%">
 <tbody><tr><td align="center">
 <table align="center" width="100%" height="100">
 <tbody><tr><td align="center" width="150">
-
-<div><marquee behavior="slide" direction="right" loop=" "><font color="black"><h1><em><a name="home">
- </a> </em></h1></font></marquee></div>
-
-
 </td> </tr></tbody></table>
 </td>
 </tr></tbody></table>
