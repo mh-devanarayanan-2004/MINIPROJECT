@@ -237,14 +237,14 @@ main {
         <label><b>User Name
         </b><br>
         </label>
-        <input type="text" name="Uname" id="Uname" placeholder="Username">
+        <input type="text" id="Uname" placeholder="Username" required>
         <br><br>
         <label><b>Password
         </b><br>
         </label>
-        <input type="Password" name="Pass" id="Pass" placeholder="Password">
+        <input type="password" id="Pass" placeholder="Password" required>
         <br><br>
-        <a href="#"><input type="button" name="log" id="log" value="Log In Here"></a>
+        <input type="button" id="log" value="Log In Here" onclick="validateLogin()">
         <br><br>
    <div class="remember-me">
   <input type="checkbox" id="check">
@@ -253,5 +253,24 @@ main {
 </div>
     </form>
 </div></div></div> <br><br> <br><br>
+
+<script>
+function validateLogin() {
+    var username = document.getElementById("Uname").value;
+    var password = document.getElementById("Pass").value;
+
+    // Hardcoded credentials
+    var validUsername = "admin";
+    var validPassword = "password123";
+
+    if (username === validUsername && password === validPassword) {
+        alert("Login Successful!");
+        window.location.href = "https://mh-devanarayanan-2004.github.io/MINIPROJECT/table1.html"; // Redirect on success
+    } else {
+        alert("Invalid Username or Password");
+    }
+}
+</script>
+	
 </body>
 </html>
