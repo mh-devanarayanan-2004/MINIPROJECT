@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Background Table</title>
+    <title>Real-Time Data Table</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
         body {
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -35,67 +41,118 @@
             object-fit: cover;
         }
 
-  table {
-      top: 20%;
-      left: 50%;
-      border-collapse: collapse;
-      width: 50%;
-    }
-    th, td {
-      border: 1px;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #A4B465;
-    }
+        table {
+            position: relative;
+            border-collapse: collapse;
+            width: 60%;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-tr:nth-child(odd) {background-color: #f2f2f2;}
-tr:nth-child(even) {background-color: #505050;}
-        
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
 
+        th {
+            background-color: #A4B465;
+            color:  #505050;
+        }
 
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #505050;
+            color: white;
         }
     </style>
 </head>
 <body>
 
+    <!-- Video Background -->
     <div class="video-container">
         <video autoplay loop muted>
-            <source src="video_back.mp4" type="video/mp4">
+            <source src="video_back1.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
 
+    <!-- Data Table -->
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>MQ-7</th>
+                <th>MQ-8</th>
+                <th>MQ-6</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr>
+                <td colspan="6">Loading data...</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <table>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Phone</th>
-    </tr>
-    <tr>
-      <td>John Doe</td>
-      <td>john@example.com</td>
-      <td>123-456-7890</td>
-    </tr>
-    <tr>
-      <td>Jane Doe</td>
-      <td>jane@example.com</td>
-      <td>987-654-3210</td>
-    </tr>
-    <tr>
-      <td>John Doe</td>
-      <td>john@example.com</td>
-      <td>123-456-7890</td>
-    </tr>
-    <tr>
-      <td>John Doe</td>
-      <td>john@example.com</td>
-      <td>123-456-7890</td>
-    </tr>
-  </table>
+ <script>
+    // ✅ Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMFwD6usL7HVPCfFffuXgl78RrrswNH5c",
+        authDomain: "real-time-air-quality-mo-73b71.firebaseapp.com",
+        databaseURL: "https://real-time-air-quality-mo-73b71-default-rtdb.firebaseio.com",
+        projectId: "real-time-air-quality-mo-73b71",
+        storageBucket: "real-time-air-quality-mo-73b71.firebasestorage.app",
+        messagingSenderId: "743458695392",
+        appId: "1:743458695392:web:83073b3395da5144058885",
+        measurementId: "G-RTDFF2DR0V"
+    };
 
+    // ✅ Initialize Firebase (Ensure Single Instance)
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const database = firebase.database();
+
+    // ✅ Function to Fetch Real-Time Data
+    function fetchData() {
+        const tableBody = document.getElementById("tableBody");
+
+        database.ref("/sensorData/latest").on("value", (snapshot) => {
+            const data = snapshot.val();
+
+            if (data) {
+                // ✅ Use the timestamp directly from Firebase (No Conversion Needed)
+                const timestampFormatted = data.timestamp ? data.timestamp : "N/A";
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td>${data.mq7 ? data.mq7.toFixed(2) : "N/A"}</td>
+                        <td>${data.mq8 ? data.mq8.toFixed(2) : "N/A"}</td>
+                        <td>${data.mq6 ? data.mq6.toFixed(2) : "N/A"}</td>
+                        <td>${data.temperature !== -999 ? data.temperature.toFixed(2) : "N/A"}</td>
+                        <td>${data.humidity !== -999 ? data.humidity.toFixed(2) : "N/A"}</td>
+                        <td>${timestampFormatted}</td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="6">No data available</td></tr>`;
+            }
+        }, (error) => {
+            console.error("Firebase Database Error: ", error);
+            tableBody.innerHTML = `<tr><td colspan="6">Error loading data</td></tr>`;
+        });
+    }
+
+    // ✅ Fetch Data from Firebase
+    fetchData();
+</script>
 
 </body>
 </html>
