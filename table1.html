@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Data Table</title>
+    <title>Real-Time Data Table with Graph</title>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: black;
+            overflow-y: auto;
         }
 
         .video-container {
@@ -42,13 +44,13 @@
         }
 
         table {
-            position: relative;
             border-collapse: collapse;
-            width: 60%;
-            margin-top: 20px;
+            width: 80%;
+            max-width: 900px;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         th, td {
@@ -70,11 +72,19 @@
             background-color: #505050;
             color: white;
         }
+
+        canvas {
+            width: 80%;
+            height: 5%;
+            max-width: 900px;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Video Background -->
     <div class="video-container">
         <video autoplay loop muted>
             <source src="video_back1.mp4" type="video/mp4">
@@ -82,7 +92,6 @@
         </video>
     </div>
 
-    <!-- Data Table -->
     <table id="dataTable">
         <thead>
             <tr>
@@ -101,58 +110,95 @@
         </tbody>
     </table>
 
- <script>
-    //  Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDMFwD6usL7HVPCfFffuXgl78RrrswNH5c",
-        authDomain: "real-time-air-quality-mo-73b71.firebaseapp.com",
-        databaseURL: "https://real-time-air-quality-mo-73b71-default-rtdb.firebaseio.com",
-        projectId: "real-time-air-quality-mo-73b71",
-        storageBucket: "real-time-air-quality-mo-73b71.firebasestorage.app",
-        messagingSenderId: "743458695392",
-        appId: "1:743458695392:web:83073b3395da5144058885",
-        measurementId: "G-RTDFF2DR0V"
-    };
+    <canvas id="humidityTempChart"></canvas>
 
-    //  Initialize Firebase (Ensure Single Instance)
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const database = firebase.database();
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMFwD6usL7HVPCfFffuXgl78RrrswNH5c",
+            authDomain: "real-time-air-quality-mo-73b71.firebaseapp.com",
+            databaseURL: "https://real-time-air-quality-mo-73b71-default-rtdb.firebaseio.com",
+            projectId: "real-time-air-quality-mo-73b71",
+            storageBucket: "real-time-air-quality-mo-73b71.firebasestorage.app",
+            messagingSenderId: "743458695392",
+            appId: "1:743458695392:web:83073b3395da5144058885",
+            measurementId: "G-RTDFF2DR0V"
+        };
 
-    //  Function to Fetch Real-Time Data
-    function fetchData() {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
         const tableBody = document.getElementById("tableBody");
+        const ctx = document.getElementById("humidityTempChart").getContext("2d");
+        
+        let labels = [];
+        let temperatureData = [];
+        let humidityData = [];
 
-        database.ref("/sensorData/latest").on("value", (snapshot) => {
-            const data = snapshot.val();
-
-            if (data) {
-                // Use the timestamp directly from Firebase (No Conversion Needed)
-                const timestampFormatted = data.timestamp ? data.timestamp : "N/A";
-
-                tableBody.innerHTML = `
-                    <tr>
-                        <td>${data.mq7 ? data.mq7.toFixed(2) : "N/A"}</td>
-                        <td>${data.mq8 ? data.mq8.toFixed(2) : "N/A"}</td>
-                        <td>${data.mq6 ? data.mq6.toFixed(2) : "N/A"}</td>
-                        <td>${data.temperature !== -999 ? data.temperature.toFixed(2) : "N/A"}</td>
-                        <td>${data.humidity !== -999 ? data.humidity.toFixed(2) : "N/A"}</td>
-                        <td>${timestampFormatted}</td>
-                    </tr>
-                `;
-            } else {
-                tableBody.innerHTML = `<tr><td colspan="6">No data available</td></tr>`;
+        const chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Temperature (°C)",
+                        data: temperatureData,
+                        borderColor: "red",
+                        fill: false
+                    },
+                    {
+                        label: "Humidity (%)",
+                        data: humidityData,
+                        borderColor: "blue",
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: "Time" } },
+                    y: { title: { display: true, text: "Value" } }
+                }
             }
-        }, (error) => {
-            console.error("Firebase Database Error: ", error);
-            tableBody.innerHTML = `<tr><td colspan="6">Error loading data</td></tr>`;
         });
-    }
 
-    //  Fetch Data from Firebase
-    fetchData();
-</script>
+        function fetchData() {
+            database.ref("/sensorData/latest").on("value", (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const timestampFormatted = data.timestamp || "N/A";
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td>${data.mq7 ? data.mq7.toFixed(2) : "N/A"}</td>
+                            <td>${data.mq8 ? data.mq8.toFixed(2) : "N/A"}</td>
+                            <td>${data.mq6 ? data.mq6.toFixed(2) : "N/A"}</td>
+                            <td>${data.temperature !== -999 ? data.temperature.toFixed(2) : "N/A"}</td>
+                            <td>${data.humidity !== -999 ? data.humidity.toFixed(2) : "N/A"}</td>
+                            <td>${timestampFormatted}</td>
+                        </tr>
+                    `;
 
+                    if (labels.length > 5) {
+                        labels.shift();
+                        temperatureData.shift();
+                        humidityData.shift();
+                    }
+
+                    labels.push(timestampFormatted);
+                    temperatureData.push(data.temperature || 0);
+                    humidityData.push(data.humidity || 0);
+
+                    chart.update();
+                }
+            }, (error) => {
+                console.error("Firebase Database Error: ", error);
+                tableBody.innerHTML = `<tr><td colspan="6">Error loading data</td></tr>`;
+            });
+        }
+
+        fetchData();
+    </script>
 </body>
 </html>
