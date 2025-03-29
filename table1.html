@@ -75,7 +75,7 @@
 
         canvas {
             width: 80%;
-            height: 5%;
+            height: 10%;
             max-width: 900px;
             background: white;
             border-radius: 10px;
@@ -135,6 +135,9 @@
         let labels = [];
         let temperatureData = [];
         let humidityData = [];
+        let mq7Data = [];
+        let mq8Data = [];
+        let mq6Data = [];
 
         const chart = new Chart(ctx, {
             type: "line",
@@ -151,6 +154,24 @@
                         label: "Humidity (%)",
                         data: humidityData,
                         borderColor: "blue",
+                        fill: false
+                    },
+                    {
+                        label: "MQ-7",
+                        data: mq7Data,
+                        borderColor: "green",
+                        fill: false
+                    },
+                    {
+                        label: "MQ-8",
+                        data: mq8Data,
+                        borderColor: "purple",
+                        fill: false
+                    },
+                    {
+                        label: "MQ-6",
+                        data: mq6Data,
+                        borderColor: "orange",
                         fill: false
                     }
                 ]
@@ -184,12 +205,17 @@
                         labels.shift();
                         temperatureData.shift();
                         humidityData.shift();
+                        mq7Data.shift();
+                        mq8Data.shift();
+                        mq6Data.shift();
                     }
 
                     labels.push(timestampFormatted);
                     temperatureData.push(data.temperature || 0);
                     humidityData.push(data.humidity || 0);
-
+                    mq7Data.push(data.mq7 || 0);
+                    mq8Data.push(data.mq8 || 0);
+                    mq6Data.push(data.mq6 || 0);
                     chart.update();
                 }
             }, (error) => {
