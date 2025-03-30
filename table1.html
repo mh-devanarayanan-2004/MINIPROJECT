@@ -195,10 +195,7 @@
         let sound = document.getElementById("alertSound");
         sound.play().catch(error => console.log("Audio play failed: ", error));
     }
-
-document.addEventListener("click", () => {
-    let sound = document.getElementById("alertSound");
-    sound.play().catch(error => console.log("Autoplay blocked:", error));}, { once: true });  
+ 
 
 
     function fetchData() {
