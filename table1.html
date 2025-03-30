@@ -112,6 +112,8 @@
 
     <canvas id="humidityTempChart"></canvas>
 
+<audio id="alertSound" src="alert.mp3"></audio>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDMFwD6usL7HVPCfFffuXgl78RrrswNH5c",
@@ -189,46 +191,75 @@
             return (value / 1023) * 100;
         }
 
-        function fetchData() {
-            database.ref("/sensorData/latest").on("value", (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const timestampFormatted = data.timestamp || "N/A";
-                    let mq7_Percent = convertToPercentage(data.mq7);
-                    let mq8_Percent = convertToPercentage(data.mq8);
-                    let mq6_Percent = convertToPercentage(data.mq6);
-  if (labels.length >= 5) {
-                        labels.shift();
-                        temperatureData.shift();
-                        humidityData.shift();
-                        mq7Data.shift();
-                        mq8Data.shift();
-                        mq6Data.shift();
-                    }
+    function playAlertSound() {
+        let sound = document.getElementById("alertSound");
+        sound.play().catch(error => console.log("Audio play failed: ", error));
+    }
 
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td>${mq7_Percent.toFixed(2)}%</td>
-                            <td>${mq8_Percent.toFixed(2)}%</td>
-                            <td>${mq6_Percent.toFixed(2)}%</td>
-                            <td>${data.temperature.toFixed(2)}°C</td>
-                            <td>${data.humidity.toFixed(2)}%</td>
-                            <td>${timestampFormatted}</td>
-                        </tr>
-                    `;
+document.addEventListener("click", () => {
+    let sound = document.getElementById("alertSound");
+    sound.play().catch(error => console.log("Autoplay blocked:", error));}, { once: true });  
 
-                    labels.push(timestampFormatted);
-                    temperatureData.push(data.temperature);
-                    humidityData.push(data.humidity);
-                    mq7Data.push(mq7_Percent);
-                    mq8Data.push(mq8_Percent);
-                    mq6Data.push(mq6_Percent);
-                    chart.update();
+
+    function fetchData() {
+        database.ref("/sensorData/latest").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const timestampFormatted = data.timestamp || "N/A";
+                let mq7_Percent = convertToPercentage(data.mq7);
+                let mq8_Percent = convertToPercentage(data.mq8);
+                let mq6_Percent = convertToPercentage(data.mq6);
+
+
+
+    
+                let alertMessage = "";
+                if (mq7_Percent > 70 || mq8_Percent > 70 || mq6_Percent > 70) {
+                   
+                    alertMessage = "⚠️ Warning: High gas levels detected!";
+                    
                 }
-            });
-        }
 
-        fetchData();
-    </script>
+                if (labels.length >= 5) {
+                    labels.shift();
+                    temperatureData.shift();
+                    humidityData.shift();
+                    mq7Data.shift();
+                    mq8Data.shift();
+                    mq6Data.shift();
+                }
+                
+                tableBody.innerHTML = `
+                    <tr>
+                        <td style="color: ${mq7_Percent > 70 ? 'red' : 'white'}">${mq7_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq8_Percent > 70 ? 'red' : 'white'}">${mq8_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq6_Percent > 70 ? 'red' : 'white'}">${mq6_Percent.toFixed(2)}%</td>
+                        <td>${data.temperature.toFixed(2)}°C</td>
+                        <td>${data.humidity.toFixed(2)}%</td>
+                        <td>${timestampFormatted}</td>
+                    </tr>
+                `;
+                
+                if (alertMessage) {
+    setTimeout(() => {
+        alert(alertMessage);
+        playAlertSound();
+    }, 100);  
+}
+
+                
+                labels.push(timestampFormatted);
+                temperatureData.push(data.temperature);
+                humidityData.push(data.humidity);
+                mq7Data.push(mq7_Percent);
+                mq8Data.push(mq8_Percent);
+                mq6Data.push(mq6_Percent);
+                chart.update();
+            }
+        });
+    }
+
+    fetchData();
+</script>
 </body>
 </html>
