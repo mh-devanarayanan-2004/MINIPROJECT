@@ -95,9 +95,9 @@
     <table id="dataTable">
         <thead>
             <tr>
-                <th>MQ-7</th>
-                <th>MQ-8</th>
-                <th>MQ-6</th>
+                <th>MQ-7 (%)</th>
+                <th>MQ-8 (%)</th>
+                <th>MQ-6 (%)</th>
                 <th>Temperature (°C)</th>
                 <th>Humidity (%)</th>
                 <th>Timestamp</th>
@@ -157,19 +157,19 @@
                         fill: false
                     },
                     {
-                        label: "MQ-7",
+                        label: "MQ-7 (%)",
                         data: mq7Data,
                         borderColor: "green",
                         fill: false
                     },
                     {
-                        label: "MQ-8",
+                        label: "MQ-8 (%)",
                         data: mq8Data,
                         borderColor: "purple",
                         fill: false
                     },
                     {
-                        label: "MQ-6",
+                        label: "MQ-6 (%)",
                         data: mq6Data,
                         borderColor: "orange",
                         fill: false
@@ -180,28 +180,24 @@
                 responsive: true,
                 scales: {
                     x: { title: { display: true, text: "Time" } },
-                    y: { title: { display: true, text: "Value" } }
+                    y: { title: { display: true, text: "Value (%)" } }
                 }
             }
         });
+
+        function convertToPercentage(value) {
+            return (value / 1023) * 100;
+        }
 
         function fetchData() {
             database.ref("/sensorData/latest").on("value", (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const timestampFormatted = data.timestamp || "N/A";
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td>${data.mq7 ? data.mq7.toFixed(2) : "N/A"}</td>
-                            <td>${data.mq8 ? data.mq8.toFixed(2) : "N/A"}</td>
-                            <td>${data.mq6 ? data.mq6.toFixed(2) : "N/A"}</td>
-                            <td>${data.temperature !== -999 ? data.temperature.toFixed(2) : "N/A"}</td>
-                            <td>${data.humidity !== -999 ? data.humidity.toFixed(2) : "N/A"}</td>
-                            <td>${timestampFormatted}</td>
-                        </tr>
-                    `;
-
-                    if (labels.length > 5) {
+                    let mq7_Percent = convertToPercentage(data.mq7);
+                    let mq8_Percent = convertToPercentage(data.mq8);
+                    let mq6_Percent = convertToPercentage(data.mq6);
+  if (labels.length >= 5) {
                         labels.shift();
                         temperatureData.shift();
                         humidityData.shift();
@@ -210,17 +206,25 @@
                         mq6Data.shift();
                     }
 
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td>${mq7_Percent.toFixed(2)}%</td>
+                            <td>${mq8_Percent.toFixed(2)}%</td>
+                            <td>${mq6_Percent.toFixed(2)}%</td>
+                            <td>${data.temperature.toFixed(2)}°C</td>
+                            <td>${data.humidity.toFixed(2)}%</td>
+                            <td>${timestampFormatted}</td>
+                        </tr>
+                    `;
+
                     labels.push(timestampFormatted);
-                    temperatureData.push(data.temperature || 0);
-                    humidityData.push(data.humidity || 0);
-                    mq7Data.push(data.mq7 || 0);
-                    mq8Data.push(data.mq8 || 0);
-                    mq6Data.push(data.mq6 || 0);
+                    temperatureData.push(data.temperature);
+                    humidityData.push(data.humidity);
+                    mq7Data.push(mq7_Percent);
+                    mq8Data.push(mq8_Percent);
+                    mq6Data.push(mq6_Percent);
                     chart.update();
                 }
-            }, (error) => {
-                console.error("Firebase Database Error: ", error);
-                tableBody.innerHTML = `<tr><td colspan="6">Error loading data</td></tr>`;
             });
         }
 
