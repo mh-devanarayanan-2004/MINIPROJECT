@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         body {
@@ -81,6 +82,24 @@
             border-radius: 10px;
             padding: 10px;
         }
+
+        button {
+    background-color: #007BFF;  /* Blue color */
+    color: white;               /* White text */
+    border: none;               /* No border */
+    padding: 12px 24px;         /* Padding for size */
+    font-size: 16px;            /* Text size */
+    border-radius: 8px;         /* Rounded corners */
+    cursor: pointer;            /* Pointer cursor */
+    transition: 0.3s;           /* Smooth hover effect */
+}
+
+button:hover {
+    background-color: #0056b3;  /* Darker blue on hover */
+}
+
+      
+
     </style>
 </head>
 <body>
@@ -111,6 +130,8 @@
     </table>
 
     <canvas id="humidityTempChart"></canvas>
+<br><br>
+<button onclick="downloadPDF()">Download Report</button>
 
 <audio id="alertSound" src="alert.mp3"></audio>
 
@@ -127,9 +148,41 @@
         };
 
         if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+            firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
+
+          async function downloadPDF() {
+            // Fetch data from Firebase Realtime Database
+            const snapshot = await database.ref("/sensorData").once("value");
+            const data = snapshot.val();
+
+            if (!data) {
+                alert("No data found!");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(14);
+            doc.text("Realtime Sensor Data Report", 10, 10);
+
+            let y = 20;
+            Object.keys(data).forEach((key) => {
+                const entry = data[key];
+                doc.text(`Timestamp: ${entry.timestamp}`, 10, y);
+                doc.text(`MQ-7: ${entry.mq7} ADC VOLTAGE`, 10, y + 10);
+                doc.text(`MQ-8: ${entry.mq8} ADC VOLTAGE`, 10, y + 20);
+                doc.text(`MQ-6: ${entry.mq6} ADC VOLTAGE`, 10, y + 30);
+                doc.text(`Temp: ${entry.temperature}°C, Humidity: ${entry.humidity}%`, 10, y + 40);
+                y += 50;
+            });
+
+            // Save PDF
+            doc.save("Realtime_Sensor_Report.pdf");
+        }
+
+
 
         const tableBody = document.getElementById("tableBody");
         const ctx = document.getElementById("humidityTempChart").getContext("2d");
@@ -195,6 +248,7 @@
         let sound = document.getElementById("alertSound");
         sound.play().catch(error => console.log("Audio play failed: ", error));
     }
+
  
 
 
