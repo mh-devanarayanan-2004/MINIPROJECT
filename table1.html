@@ -84,18 +84,18 @@
         }
 
         button {
-    background-color: #007BFF;  /* Blue color */
-    color: white;               /* White text */
-    border: none;               /* No border */
-    padding: 12px 24px;         /* Padding for size */
-    font-size: 16px;            /* Text size */
-    border-radius: 8px;         /* Rounded corners */
-    cursor: pointer;            /* Pointer cursor */
-    transition: 0.3s;           /* Smooth hover effect */
+    background-color: #007BFF;  
+    color: white;               
+    border: none;               
+    padding: 12px 24px;         
+    font-size: 16px;           
+    border-radius: 8px;         
+    cursor: pointer;            
+    transition: 0.3s;           
 }
 
 button:hover {
-    background-color: #0056b3;  /* Darker blue on hover */
+    background-color: #0056b3;  
 }
 
       
@@ -116,7 +116,8 @@ button:hover {
             <tr>
                 <th>CO (%)</th>
                 <th>H2 (%)</th>
-                <th>LPG (%)</th>
+                <th>VOC (%)</th>
+                <th>Air Quality (%)</th>
                 <th>Temperature (°C)</th>
                 <th>Humidity (%)</th>
                 <th>Timestamp</th>
@@ -171,11 +172,12 @@ button:hover {
             Object.keys(data).forEach((key) => {
                 const entry = data[key];
                 doc.text(`Timestamp: ${entry.timestamp}`, 10, y);
-                doc.text(`MQ-7: ${entry.mq7} ADC VOLTAGE`, 10, y + 10);
-                doc.text(`MQ-8: ${entry.mq8} ADC VOLTAGE`, 10, y + 20);
-                doc.text(`MQ-6: ${entry.mq6} ADC VOLTAGE`, 10, y + 30);
-                doc.text(`Temp: ${entry.temperature}°C, Humidity: ${entry.humidity}%`, 10, y + 40);
-                y += 50;
+                doc.text(`CO: ${entry.mq7} ADC VOLTAGE`, 10, y + 10);
+                doc.text(`H2: ${entry.mq8} ADC VOLTAGE`, 10, y + 20);
+                doc.text(`VOC: ${entry.mq6} ADC VOLTAGE`, 10, y + 30);
+                doc.text(`Air Quality: ${entry.mq135} ADC VOLTAGE`, 10, y + 40);
+                doc.text(`Temperature: ${entry.temperature}°C, Humidity: ${entry.humidity}%`, 10, y + 50);
+                y += 60;
             });
 
             // Save PDF
@@ -193,6 +195,7 @@ button:hover {
         let mq7Data = [];
         let mq8Data = [];
         let mq6Data = [];
+        let mq135Data = [];
 
         const chart = new Chart(ctx, {
             type: "line",
@@ -224,11 +227,15 @@ button:hover {
                         fill: false
                     },
                     {
-                        label: "LPG (%)",
+                        label: "VOC (%)",
                         data: mq6Data,
                         borderColor: "orange",
                         fill: false
-                    }
+                    },
+                    { label: "Air Quality (%)", 
+                      data: mq135Data, 
+                      borderColor: "cyan", 
+                      fill: false }
                 ]
             },
             options: {
@@ -260,12 +267,12 @@ button:hover {
                 let mq7_Percent = convertToPercentage(data.mq7);
                 let mq8_Percent = convertToPercentage(data.mq8);
                 let mq6_Percent = convertToPercentage(data.mq6);
-
+                let mq135_Percent = convertToPercentage(data.mq135);
 
 
     
                 let alertMessage = "";
-                if (mq7_Percent > 70 || mq8_Percent > 70 || mq6_Percent > 70) {
+                if (mq7_Percent > 70 || mq8_Percent > 70 || mq6_Percent > 10) {
                    
                     alertMessage = "⚠️ Warning: High gas levels detected!";
                     
@@ -284,7 +291,8 @@ button:hover {
                     <tr>
                         <td style="color: ${mq7_Percent > 70 ? 'red' : 'white'}">${mq7_Percent.toFixed(2)}%</td>
                         <td style="color: ${mq8_Percent > 70 ? 'red' : 'white'}">${mq8_Percent.toFixed(2)}%</td>
-                        <td style="color: ${mq6_Percent > 70 ? 'red' : 'white'}">${mq6_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq6_Percent >10 ? 'red' : 'white'}">${mq6_Percent.toFixed(2)}%</td>
+                        <td>${mq135_Percent.toFixed(2)}%</td>
                         <td>${data.temperature.toFixed(2)}°C</td>
                         <td>${data.humidity.toFixed(2)}%</td>
                         <td>${timestampFormatted}</td>
@@ -305,6 +313,7 @@ button:hover {
                 mq7Data.push(mq7_Percent);
                 mq8Data.push(mq8_Percent);
                 mq6Data.push(mq6_Percent);
+                mq135Data.push(mq135_Percent);
                 chart.update();
             }
         });
