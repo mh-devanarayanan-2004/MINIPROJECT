@@ -62,8 +62,14 @@
 
         th {
             background-color: #A4B465;
+             font-weight: bold;
             color:  #505050;
         }
+
+        td {
+    font-weight: bold;
+}
+
 
         tr:nth-child(even) {
             background-color: #f2f2f2;
@@ -289,12 +295,12 @@ button:hover {
                 
                 tableBody.innerHTML = `
                     <tr>
-                        <td style="color: ${mq7_Percent > 70 ? 'red' : 'white'}">${mq7_Percent.toFixed(2)}%</td>
-                        <td style="color: ${mq8_Percent > 70 ? 'red' : 'white'}">${mq8_Percent.toFixed(2)}%</td>
-                        <td style="color: ${mq6_Percent >10 ? 'red' : 'white'}">${mq6_Percent.toFixed(2)}%</td>
-                        <td>${mq135_Percent.toFixed(2)}%</td>
-                        <td>${data.temperature.toFixed(2)}°C</td>
-                        <td>${data.humidity.toFixed(2)}%</td>
+                        <td style="color: ${mq7_Percent > 70 ? '#FF3131' : '#90EE90'}">${mq7_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq8_Percent > 70 ? '#FF3131' : '#90EE90'}">${mq8_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq6_Percent >10 ? '#FF3131' : '#90EE90'}">${mq6_Percent.toFixed(2)}%</td>
+                        <td style="color: ${mq135_Percent >70 ? '#FF3131' : '#90EE90'}">${mq135_Percent.toFixed(2)}%</td>
+                        <td style="color: #FFBF00;">${data.temperature.toFixed(2)}°C</td>
+                        <td style="color: #40E0D0;">${data.humidity.toFixed(2)}%</td>
                         <td>${timestampFormatted}</td>
                     </tr>
                 `;
